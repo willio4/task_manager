@@ -1,0 +1,49 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: aliceblue;
+    margin:0;
+}
+
+.creds {
+    min-width: 6rem;
+}
+
+#top-nav {
+    background-color: blue;
+}
+#bottom-nav {
+    background-color: #3333ff;
+}
+
+#overview {
+    min-height: 20rem;
+}
+
+.top-card {
+    max-width: 10rem;
+}
+
+nav h1 {
+    color: white;
+}
+
+footer {
+    background-color: blue;
+}
+
+footer div footer p {
+    color: white;
+}
+
+main {
+    display: flex;
+    flex:1;
+    height: fit-content;
+}

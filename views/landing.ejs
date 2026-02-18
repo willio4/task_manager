@@ -1,0 +1,83 @@
+<%- include("../views/partials/header.ejs") %>
+
+<main class="d-flex flex-row mt-3">
+  <div class="container">
+    <h2>Dashboard</h2>
+    <div class="row row-cols-4">
+      <div class="col">
+        <div class="card text-dark bg-light mb-3 top-card">
+          <div class="card-header">All Tasks</div>
+          <div class="card-body">
+            <p class="card-text">24</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card text-dark bg-light mb-3 top-card">
+          <div class="card-header">Completed</div>
+          <div class="card-body">
+            <p class="card-text">14</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card text-dark bg-light mb-3 top-card">
+          <div class="card-header">Working</div>
+          <div class="card-body">
+            <p class="card-text">7</p>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card text-dark bg-light mb-3 top-card">
+          <div class="card-header">Stuck</div>
+          <div class="card-body">
+            <p class="card-text">3</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="card text-dark bg-light mb-3">
+          <div class="card-header">Overview:</div>
+          <div class="card-body">
+            <p id="overview" class="card-text">
+              charts and graphs depicting the overall work based on the users
+              group
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="card text-dark bg-light mb-3">
+          <div class="card-header">Assigned Tasks:</div>
+          <div class="card-body">
+            <ul class="card-text">
+              <li>Assigned Task 1</li>
+              <li>Assigned Task 2</li>
+              <li>Assigned Task 3</li>
+              <li>Assigned Task 4</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card text-dark bg-light mb-3">
+          <div class="card-header">Other Tasks:</div>
+          <div class="card-body">
+            <ul class="card-text">
+              <li>Task 1</li>
+              <li>Task 2</li>
+              <li>Task 3</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../views/partials/footer.ejs") %>
