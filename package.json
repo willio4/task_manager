@@ -13,11 +13,13 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
-    "bootstrap": "^5.3.8",
     "dotenv": "^17.3.1",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "nodemon": "^3.1.11",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "pg": "^8.18.0"
   }
 }

@@ -12,15 +12,25 @@
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
     <nav id="top-nav" class="d-flex flex-row">
       <div class="container py-1 flex-grow-1">
         <h1>Task Manager</h1>
       </div>
-
-      <a href="/login" class="align-self-center"><button class="btn text-white creds">Login</button></a>
-      <a href="/signup" class="align-self-center"><button class="btn text-white creds">Sign Up</button></a>
+      <% if(currentUser) { %>
+        <p class="align-self-center text-white m-0"><%= currentUser.email %></p>
+        <a href="/logout" class="align-self-center">
+          <button class="btn text-white creds">Logout</button>
+        </a>
+      <% } else { %>
+        <a href="/login" class="align-self-center">
+          <button class="btn text-white creds">Login</button>
+        </a>
+        <a href="/signup" class="align-self-center">
+          <button class="btn text-white creds">Sign Up</button>
+        </a>
+      <% } %> 
     </nav>
+
     <nav id="bottom-nav">
       <div class="container text-center">
         <div class="d-flex flex-row justify-content-start gap-3">
@@ -33,5 +43,3 @@
         </div>
       </div>
     </nav>
-  </body>
-</html>
