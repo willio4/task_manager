@@ -11,6 +11,10 @@ body {
     margin:0;
 }
 
+#profile-link {
+    text-decoration: none;
+}
+
 .creds {
     min-width: 6rem;
 }

@@ -12,12 +12,13 @@
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
+  <body>
     <nav id="top-nav" class="d-flex flex-row">
       <div class="container py-1 flex-grow-1">
-        <h1>Task Manager</h1>
+        <h1><a href="/" class="text-white text-decoration-none">Task Manager</a></h1>
       </div>
-      <% if(currentUser) { %>
-        <p class="align-self-center text-white m-0"><%= currentUser.email %></p>
+      <% if(currentProfile) { %>
+        <a href="/profile" id="profile-link" class="align-self-center creds text-white">Welcome, <%= currentProfile.first_name %></a>
         <a href="/logout" class="align-self-center">
           <button class="btn text-white creds">Logout</button>
         </a>
@@ -39,7 +40,9 @@
           <button class="btn text-white fw-semibold">My Work</button>
           <button class="btn text-white fw-semibold">Activity</button>
           <button class="btn text-white fw-semibold">Health</button>
-          <button class="btn text-white fw-semibold">Admin</button>
+          <% if(currentProfile && currentProfile.role === "Admin") { %>
+             <button class="btn text-white fw-semibold">Admin</button>
+          <% } %>
         </div>
       </div>
     </nav>

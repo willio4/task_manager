@@ -1,0 +1,23 @@
+<%- include("../views/partials/header.ejs") %>
+<main>
+  
+  <div class="container my-5">
+    <img
+      src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+      alt="Profile Image"
+      class="rounded-circle text-center d-block mx-auto mb-4"
+      style="width: 250px; height: 250px"
+    />
+    <h3 class="text-center">Profile:</h3>
+    <div class="container my-4">
+      <p><strong>First Name:</strong> <%= currentProfile.first_name %></p>
+      <p><strong>Last Name:</strong> <%= currentProfile.last_name %></p>
+      <p><strong>Email Address:</strong> <%= currentUser.email %></p>
+      <p><strong>Role:</strong> <%= currentProfile.role %></p>
+    </div>
+  </div>
+  <div class="container my-4 justify-content-center">
+    
+  </div>
+</main>
+<%- include("../views/partials/footer.ejs") %>

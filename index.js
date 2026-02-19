@@ -10,14 +10,24 @@ env.config();
 
 const app = express();
 const port = process.env.PORT;
-let isLoggedIn = false;
+const year = new Date().getFullYear();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
-  next();
+import path from "path";
+
+app.set("view engine", "ejs");
+app.set("views", path.join(process.cwd(), "views"));
+
+
+const db = new pg.Pool({
+  host: process.env.PG_HOST,
+  user: process.env.PG_USER,
+  database: process.env.PG_DB,
+  password: process.env.PG_PW,
+  port: process.env.PG_PORT,
 });
 
+db.connect();
 
 app.use(
   session({
@@ -30,53 +40,92 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
+app.use(async (req, res, next) => {
+  if (req.user) {
+    try {
+      const result = await db.query(
+        "SELECT * FROM profiles WHERE user_id = $1",
+        [req.user.id]
+      );
+      res.locals.currentProfile = result.rows[0];
+      res.locals.currentUser = req.user;
+    } catch (err) {
+      console.error(err);
+      res.locals.currentProfile = null;
+      res.locals.currentUser = null;
     }
-    res.redirect("/");
-  });
+  } else {
+    res.locals.currentProfile = null;
+    res.locals.currentUser = null;
+  }
+  next();
 });
-
-const db = new pg.Pool({
-  host: process.env.PG_HOST,
-  user: process.env.PG_USER,
-  database: process.env.PG_DB,
-  password: process.env.PG_PW,
-  port: process.env.PG_PORT,
-});
-
-db.connect();
 
 app.get("/", (req, res) => {
-  let year = new Date().getFullYear();
   res.render("landing.ejs", {
     year,
-    currentUser: req.user,
   });
 });
 
+function ensureLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.redirect("/login");
+}
+
+app.get("/profile", ensureLoggedIn, (req, res) => {
+  const year = new Date().getFullYear();
+  res.render("profile", { year });
+});
+
+
 app.get("/login", (req, res) => {
-  let year = new Date().getFullYear();
   res.render("login.ejs", {
     year: year,
   });
 });
 
-app.post(
-  "/login",
-  passport.authenticate("local", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  }),
-);
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.redirect("/login");
+
+    req.logIn(user, async (err) => {
+      if (err) return next(err);
+
+      let result = await db.query("SELECT * FROM profiles WHERE user_id = $1", [user.id]);
+
+      if (result.rows.length > 0) {
+        console.log(result.rows[0]);
+        const profile = result.rows[0];
+        return res.redirect("/");
+      } else {
+        return res.redirect("/createAccount");
+      }
+    });
+  })(req, res, next);
+});
+
+app.get("/createAccount", (req, res) => {
+  res.render("createAccount.ejs", {
+    year,
+    currentUser: req.user,
+  });
+});
+
+app.post("/createAccount", async (req, res) => {
+  const { fName, lName, email, role } = req.body;
+  console.log(req.body);
+  const result = await db.query(
+    "INSERT INTO profiles(user_id, first_name, last_name, role) VALUES($1,$2,$3,$4) RETURNING *",
+    [req.user.id, fName, lName, role],
+  );
+  
+  res.redirect("/");
+});
 
 app.get("/signup", (req, res) => {
-  let year = new Date().getFullYear();
   res.render("signup.ejs", {
     year,
-    
   });
 });
 
@@ -100,6 +149,15 @@ app.post("/signup", async (req, res, next) => {
 
   req.login(result.rows[0], (err) => {
     if (err) return next(err);
+    res.redirect("/createAccount");
+  });
+});
+
+app.get("/logout", (req, res, next) => {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
     res.redirect("/");
   });
 });
@@ -109,7 +167,9 @@ passport.use(
     { usernameField: "email", passwordField: "password" },
     async function verify(email, password, cb) {
       try {
-        const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+        const result = await db.query("SELECT * FROM users WHERE email = $1", [
+          email,
+        ]);
         if (result.rows.length === 0) return cb(null, false);
 
         const user = result.rows[0];
@@ -119,10 +179,9 @@ passport.use(
       } catch (err) {
         return cb(err);
       }
-    }
-  )
+    },
+  ),
 );
-
 
 passport.serializeUser((user, cb) => {
   cb(null, user.id);
