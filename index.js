@@ -128,7 +128,13 @@ app.get("/signup", (req, res) => {
 });
 
 app.get("/admin", ensureLoggedIn, async (req, res) => {
-  res.render("admin.ejs", { year });
+  try {
+    const result = await db.query("select * from organizations where owner_id = $1", [req.user.id]);
+    const org = result.rows[0];
+    res.render("admin.ejs", { year, org });
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 app.post("/admin", ensureLoggedIn, async (req, res) => {
