@@ -18,7 +18,6 @@ import path from "path";
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "views"));
 
-
 const db = new pg.Pool({
   host: process.env.PG_HOST,
   user: process.env.PG_USER,
@@ -45,7 +44,7 @@ app.use(async (req, res, next) => {
     try {
       const result = await db.query(
         "SELECT * FROM profiles WHERE user_id = $1",
-        [req.user.id]
+        [req.user.id],
       );
       res.locals.currentProfile = result.rows[0];
       res.locals.currentUser = req.user;
@@ -77,7 +76,6 @@ app.get("/profile", ensureLoggedIn, (req, res) => {
   res.render("profile", { year });
 });
 
-
 app.get("/login", (req, res) => {
   res.render("login.ejs", {
     year: year,
@@ -92,10 +90,11 @@ app.post("/login", (req, res, next) => {
     req.logIn(user, async (err) => {
       if (err) return next(err);
 
-      let result = await db.query("SELECT * FROM profiles WHERE user_id = $1", [user.id]);
+      let result = await db.query("SELECT * FROM profiles WHERE user_id = $1", [
+        req.user.id,
+      ]);
 
       if (result.rows.length > 0) {
-        console.log(result.rows[0]);
         const profile = result.rows[0];
         return res.redirect("/");
       } else {
@@ -114,12 +113,11 @@ app.get("/createAccount", (req, res) => {
 
 app.post("/createAccount", async (req, res) => {
   const { fName, lName, email, role } = req.body;
-  console.log(req.body);
   const result = await db.query(
     "INSERT INTO profiles(user_id, first_name, last_name, role) VALUES($1,$2,$3,$4) RETURNING *",
     [req.user.id, fName, lName, role],
   );
-  
+
   res.redirect("/");
 });
 
@@ -129,8 +127,31 @@ app.get("/signup", (req, res) => {
   });
 });
 
+app.get("/admin", ensureLoggedIn, async (req, res) => {
+  res.render("admin.ejs", { year });
+});
+
+app.post("/admin", ensureLoggedIn, async (req, res) => {
+  const { orgName } = req.body;
+  const result = await db.query(
+    "INSERT INTO organizations(org_name, owner_id) VALUES($1, $2) RETURNING *",
+    [orgName, req.user.id],
+  );
+
+  await db.query("update profiles set organization_id = $1 where user_id = $2", [
+    result.rows[0].id,
+    req.user.id,
+  ]);
+  
+  res.redirect("/admin");
+});
+
 app.post("/signup", async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, confirmed_password } = req.body;
+
+  if (password !== confirmed_password) {
+    return res.send("Passwords do not match.");
+  }
 
   const results = await db.query("SELECT * FROM users WHERE email = $1", [
     email,

@@ -11,10 +11,10 @@ body {
     margin:0;
 }
 
-#profile-link {
+.nav-link {
     text-decoration: none;
+    color: white;
 }
-
 .creds {
     min-width: 6rem;
 }
