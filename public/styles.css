@@ -11,6 +11,10 @@ body {
     margin:0;
 }
 
+.hidden {
+    display: none;
+}
+
 .nav-link {
     text-decoration: none;
     color: white;
@@ -47,7 +51,5 @@ footer div footer p {
 }
 
 main {
-    display: flex;
-    flex:1;
-    height: fit-content;
+    flex: 1;
 }

@@ -12,7 +12,7 @@
       </form>
     </div>
         
-    <% } else {%>
+    <% } else { %>
     
     <div class="container d-flex flex-column align-items-center text-center my-5">
       <div class="">
@@ -25,7 +25,7 @@
       <div class="flex-grow-1 d-flex flex-row justify-content-around mt-5" style="width: 100%;">
         <div class="d-flex flex-column justify-content-center">
           <button class="btn btn-info btn-sm my-3 py-2">Add Manager</button>
-          <button class="btn btn-danger btn-sm my-3 py-2">Add Department Head</button>
+          <button class="btn btn-danger btn-sm my-3 py-2">Add Supervisor</button>
           <button class="btn btn-warning btn-sm my-3 py-2">Add Department</button>
           <button class="btn btn-primary btn-sm my-3 py-2">Add Associate</button>
           <button class="btn btn-success btn-sm my-3 py-2">Edit User Role</button>
@@ -33,7 +33,103 @@
           <button class="btn btn-warning btn-sm my-3 py-2">View Activity Logs</button>
           <button class="btn btn-primary btn-sm my-3 py-2">View Organization Members</button>
         </div>
-        <div>Forms</div>
+        <div class="text-left">
+          <!-- add manager form -->
+          <form action="/admin/create-manager" method="POST" class="admin-form hidden" id="addManagerForm">
+            <div class="form-group">
+              <label for="managerEmail">Manager Email:</label><br />
+              <input type="email" id="managerEmail" name="manEmail" autocomplete="off" required><br />
+            </div>
+            <div class="form-group">
+              <label for="managerTempPassword">Manager Temporary Password:</label><br />
+              <input type="text" id="managerTempPassword" name="manPassword" autocomplete="off" required><br />
+            </div>
+            <div class="form-group">
+              <label for="managerFirstName">Manager First Name:</label><br />
+              <input type="text" id="managerFirstName" name="manFirst" required><br />
+            </div>
+            <div class="form-group">
+              <label for="managerLastName">Manager Last Name:</label><br />
+              <input type="text" id="managerLastName" name="manLast" required><br />
+            </div>
+            <div class="form-group">
+              <label for="managerRole">Manager Role:</label><br />
+              <input type="radio" id="admin" name="manRole" value="Manager" checked />
+              <label for="admin">Manager</label>
+              <input type="radio" id="depHead" name="manRole" value="Supervisor" disabled/>
+              <label for="depHead">Supervisor</label>
+              <input type="radio" id="associate" name="manRole" value="Associate" disabled/>
+              <label for="associate">Associate</label>
+            </div>
+            <button type="submit" class="mt-3 btn btn-primary">Create Manager</button>
+          </form>
+          <!-- add supervisor form -->
+          <form action="/admin/create-supervisor" method="POST" class="admin-form hidden" id="addSupervisorForm">
+            <div class="form-group">
+              <label for="supeEmail">Supervisor Email:</label><br />
+              <input type="email" id="supeEmail" name="supeEmail" autocomplete="off" required><br />
+            </div>
+            <div class="form-group">
+              <label for="supeTempPassword">Supervisor Temporary Password:</label><br />
+              <input type="text" id="supeTempPassword" name="supePassword" autocomplete="off" required><br />
+            </div>
+            <div class="form-group">
+              <label for="supeFirstName">Supervisor First Name:</label><br />
+              <input type="text" id="supeFirstName" name="supeFirst" required><br />
+            </div>
+            <div class="form-group">
+              <label for="supeLastName">Supervisor Last Name:</label><br />
+              <input type="text" id="supeLastName" name="supeLast" required><br />
+            </div>
+            <div class="form-group">
+              <label for="supeDepartment">Department:</label><br />
+              <input type="text" id="supeDepartment" name="supeDepartment" required><br />
+            </div>
+            <div class="form-group">
+              <label for="supeRole">Role:</label><br />
+              <input type="radio" id="admin" name="supeRole" value="Manager" disabled />
+              <label for="admin">Manager</label>
+              <input type="radio" id="depHead" name="supeRole" value="Supervisor" checked/>
+              <label for="depHead">Supervisor</label>
+              <input type="radio" id="associate" name="supeRole" value="Associate" disabled/>
+              <label for="associate">Associate</label>
+            </div>
+            <button type="submit" class="mt-3 btn btn-primary">Create Supervisor</button>
+          </form>
+          <!-- add associate form -->
+          <form action="/admin/create-associate" method="POST" class="admin-form" id="addAssociateForm">
+            <div class="form-group">
+              <label for="empEmail">Associate Email:</label><br />
+              <input type="email" id="empEmail" name="empEmail" autocomplete="off" required><br />
+            </div>
+            <div class="form-group">
+              <label for="empTempPassword">Associate Temporary Password:</label><br />
+              <input type="text" id="empTempPassword" name="empPassword" autocomplete="off" required><br />
+            </div>
+            <div class="form-group">
+              <label for="empFirstName">Associate First Name:</label><br />
+              <input type="text" id="empFirstName" name="empFirst" required><br />
+            </div>
+            <div class="form-group">
+              <label for="empLastName">Associate Last Name:</label><br />
+              <input type="text" id="empLastName" name="empLast" required><br />
+            </div>
+            <div class="form-group">
+              <label for="empDepartment">Department:</label><br />
+              <input type="text" id="empDepartment" name="empDepartment" required><br />
+            </div>
+            <div class="form-group">
+              <label for="supeRole">Role:</label><br />
+              <input type="radio" id="admin" name="empRole" value="Manager" disabled />
+              <label for="admin">Manager</label>
+              <input type="radio" id="depHead" name="empRole" value="Supervisor" disabled/>
+              <label for="depHead">Supervisor</label>
+              <input type="radio" id="associate" name="empRole" value="Associate" checked/>
+              <label for="associate">Associate</label>
+            </div>
+            <button type="submit" class="mt-3 btn btn-primary">Create Associate</button>
+          </form>
+        </div>
       </div>
     </div>
 
