@@ -3,79 +3,177 @@
   <h1 class="text-center">My Tasks</h1>
   <div class="container text-center">
     <div class="row">
-      <!-- assigned tasks -->
       <div class="col">
         <div class="card">
-          <div class="card-header">Assigned Tasks</div>
-          <div class="card-body">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Assigner</th>
-                  <th scope="col">Assignee</th>
-                  <th scope="col">Task</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Due Date</th>
-                  <th scope="col">Priority</th>
-                  <th scope="col">Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  
-                </tr>
-              </tbody>
-            </table>
+          <div class="card-header">
+            <ul class="nav nav-pills card-header-pills my-1" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active mx-3"
+                  data-bs-toggle="pill"
+                  data-bs-target="#inbound"
+                  type="button"
+                  role="tab"
+                >
+                  Inbound
+                </button>
+              </li>
+              <% if(currentProfile.role !== "Associate") { %>}
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  data-bs-toggle="pill"
+                  data-bs-target="#outbound"
+                  type="button"
+                  role="tab"
+                >
+                  Outbound
+                </button>
+              </li>
+              <% } %>
+            </ul>
           </div>
-        </div>
-      </div>
-      <!-- delegated tasks -->
-      <div class="col">
-        <div class="card">
-          <div class="card-header">Delegated Tasks</div>
+
           <div class="card-body">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Assigner</th>
-                  <th scope="col">Assignee</th>
-                  <th scope="col">Task</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Due Date</th>
-                  <th scope="col">Priority</th>
-                  <th scope="col">Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  
-                </tr>
-              </tbody>
-            </table>
+            <div class="tab-content">
+              <!-- Inbound Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="inbound"
+                role="tabpanel"
+              >
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Done?</th>
+                      <th scope="col">Assigner</th>
+                      <th scope="col">Task</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Due Date</th>
+                      <th scope="col">Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% tasksReceived.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                      <tr>
+                        <th scope="row"><input type="checkbox" <%= task.status === "complete" ? "checked" : "" %>></th>
+                        <td><%= task.first_name %></td>
+                        <td><%= task.title %></td>
+                        <td><%= task.status %></td>
+                        <td><%= date %></td>
+                        <td><%= task.priority %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Outbound Tab -->
+              <div class="tab-pane fade" id="outbound" role="tabpanel">
+                <div class="d-flex flex-row justify-content-end mb-3">
+                  <button
+                    class="btn btn-secondary justify-content-end"
+                    data-bs-toggle="modal"
+                    data-bs-target="#taskModal"
+                  >
+                    Create Task
+                  </button>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Assignee</th>
+                      <th scope="col">Task</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Due Date</th>
+                      <th scope="col">Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% tasksCreated.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                      <tr>
+                        <td><%= task.first_name %></td>
+                        <td><%= task.title %></td>
+                        <td><%= task.status %></td>
+                        <td><%=date%></td>
+                        <td><%= task.priority %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </main>
+
+<!-- Task Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New Task...</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form action="/create-task" method="POST">
+          <div class="my-2">
+            <label for="assignee" class="form-label">Assign To: </label>
+            <select class="form-select" id="assignee" name="assignee"aria-label="Default select example">
+              <option selected>Select Employee</option>
+              <% employees.forEach(employee => { %>
+                <option value="<%= employee.user_id %>"><%= employee.first_name %> <%= employee.last_name %></option>
+              <% }) %>
+            </select>
+            <label for="task" class="form-label mt-3">Task:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="task"
+              name="task"
+              placeholder="Task"
+              autocapitalize="sentences">
+            <label for="taskDescription" class="form-label mt-3">Task Description:</label>
+            <textarea
+              class="form-control"
+              id="taskDescription"
+              name="taskDescription"
+              rows="3"
+              placeholder="Task Description"
+              autocapitalize="sentences"></textarea>
+            <label for="priority" class="form-label mt-3">Priority:</label>
+            <select class="form-select" name="priority"aria-label="Default select example">
+              <option selected>Select Priority</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+            <label for="dueDate" class="form-label mt-3">Due Date:</label>
+            <input
+              type="date"
+              class="form-control"
+              id="dueDate"
+              name="dueDate"
+              >
+          </div>
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
 <%- include("../views/partials/footer.ejs") %>

@@ -60,8 +60,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-
-
 function ensureLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/login");
@@ -72,11 +70,25 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/tasks", ensureLoggedIn, (req, res) => {
+app.get("/tasks", ensureLoggedIn, async (req, res) => {
+  const employees = await db.query(
+    "SELECT * FROM profiles WHERE organization_id = $1 AND department = $2 AND user_id != $3",
+    [
+      res.locals.currentProfile.organization_id,
+      res.locals.currentProfile.department,
+      req.user.id,
+    ],
+  );
+   const tasksReceived = await db.query("select * from tasks inner join profiles on tasks.created_by = profiles.user_id where created_for = $1", [req.user.id]);
+   const tasksCreated = await db.query("select * from tasks inner join profiles on tasks.created_for = profiles.user_id where created_by = $1", [req.user.id]);
+  
   res.render("tasks.ejs", {
-    year, 
-  })
-})
+    year,
+    employees: employees.rows,
+    tasksReceived: tasksReceived.rows,
+    tasksCreated: tasksCreated.rows,
+  });
+});
 
 app.get("/profile", ensureLoggedIn, (req, res) => {
   const year = new Date().getFullYear();
@@ -105,20 +117,43 @@ app.post("/login", (req, res, next) => {
         const profile = result.rows[0];
         return res.redirect("/");
       } else {
-        return res.redirect("/createAccount");
+        return res.redirect("/create-account");
       }
     });
   })(req, res, next);
 });
 
-app.get("/createAccount", (req, res) => {
-  res.render("createAccount.ejs", {
+app.post("/create-task", ensureLoggedIn, async (req, res) => {
+  const { task, taskDescription, dueDate, priority, assignee } = req.body;
+
+  try {
+    await db.query(
+      "insert into tasks(organization_id, title, description, priority, status, due_date, created_by, created_for) values($1, $2, $3, $4, $5, $6, $7, $8)",
+      [
+        res.locals.currentProfile.organization_id,
+        task,
+        taskDescription,
+        priority,
+        "incomplete",
+        dueDate,
+        req.user.id,
+        assignee,
+      ],
+    );
+  } catch (err) {
+    console.error(err);
+  }
+  res.redirect("/tasks");
+});
+
+app.get("/create-account", (req, res) => {
+  res.render("create-account.ejs", {
     year,
     currentUser: req.user,
   });
 });
 
-app.post("/createAccount", async (req, res) => {
+app.post("/create-account", async (req, res) => {
   const { fName, lName, email, role } = req.body;
   const result = await db.query(
     "INSERT INTO profiles(user_id, first_name, last_name, role) VALUES($1,$2,$3,$4) RETURNING *",
@@ -149,60 +184,74 @@ app.get("/admin", ensureLoggedIn, async (req, res) => {
 
 app.post("/admin/create-manager", ensureLoggedIn, async (req, res) => {
   const { manEmail, manPassword, manFirst, manLast, manRole } = req.body;
-  console.log(req.body);
   const userResult = await db.query(
     "Insert into users(email, password) values($1, $2) returning *",
     [manEmail, manPassword],
   );
   const managerId = userResult.rows[0].id;
-  const profileResult = await db.query("insert into profiles(user_id, first_name, last_name, role, organization_id) values($1, $2, $3, $4, $5) returning *", [
-    managerId,
-    manFirst,
-    manLast,
-    manRole,
-    res.locals.currentProfile.organization_id,
-  ]);
+  const profileResult = await db.query(
+    "insert into profiles(user_id, first_name, last_name, role, organization_id) values($1, $2, $3, $4, $5) returning *",
+    [
+      managerId,
+      manFirst,
+      manLast,
+      manRole,
+      res.locals.currentProfile.organization_id,
+    ],
+  );
 
-  res.redirect('/admin');
+  res.redirect("/admin");
 });
 
 app.post("/admin/create-supervisor", ensureLoggedIn, async (req, res) => {
-  const { supeEmail, supePassword, supeFirst, supeLast, supeRole, supeDepartment } = req.body;
-  console.log(req.body);
+  const {
+    supeEmail,
+    supePassword,
+    supeFirst,
+    supeLast,
+    supeRole,
+    supeDepartment,
+  } = req.body;
   const userResult = await db.query(
     "Insert into users(email, password) values($1, $2) returning *",
     [supeEmail, supePassword],
   );
   const supervisorId = userResult.rows[0].id;
-  const profileResult = await db.query("insert into profiles(user_id, first_name, last_name, role, department, organization_id) values($1, $2, $3, $4, $5, $6) returning *", [
-    supervisorId,
-    supeFirst,
-    supeLast,
-    supeRole,
-    supeDepartment,
-    res.locals.currentProfile.organization_id,
-  ]);
+  const profileResult = await db.query(
+    "insert into profiles(user_id, first_name, last_name, role, department, organization_id) values($1, $2, $3, $4, $5, $6) returning *",
+    [
+      supervisorId,
+      supeFirst,
+      supeLast,
+      supeRole,
+      supeDepartment,
+      res.locals.currentProfile.organization_id,
+    ],
+  );
 
-  res.redirect('/admin');
-})
+  res.redirect("/admin");
+});
 
 app.post("/admin/create-associate", ensureLoggedIn, async (req, res) => {
-  const { empEmail, empPassword, empFirst, empLast, empRole, empDepartment } = req.body;
-  console.log(req.body);
+  const { empEmail, empPassword, empFirst, empLast, empRole, empDepartment } =
+    req.body;
   const userResult = await db.query(
     "Insert into users(email, password) values($1, $2) returning *",
     [empEmail, empPassword],
   );
   const associateId = userResult.rows[0].id;
-  const profileResult = await db.query("insert into profiles(user_id, first_name, last_name, role, department, organization_id) values($1, $2, $3, $4, $5, $6) returning *", [
-    associateId,
-    empFirst,
-    empLast,
-    empRole,
-    empDepartment,
-    res.locals.currentProfile.organization_id,
-  ]);
-  res.redirect('/admin');
+  const profileResult = await db.query(
+    "insert into profiles(user_id, first_name, last_name, role, department, organization_id) values($1, $2, $3, $4, $5, $6) returning *",
+    [
+      associateId,
+      empFirst,
+      empLast,
+      empRole,
+      empDepartment,
+      res.locals.currentProfile.organization_id,
+    ],
+  );
+  res.redirect("/admin");
 });
 
 app.post("/admin", ensureLoggedIn, async (req, res) => {
@@ -244,7 +293,7 @@ app.post("/signup", async (req, res, next) => {
 
   req.login(result.rows[0], (err) => {
     if (err) return next(err);
-    res.redirect("/createAccount");
+    res.redirect("/create-account");
   });
 });
 
@@ -268,7 +317,7 @@ passport.use(
         if (result.rows.length === 0) return cb(null, false);
 
         const user = result.rows[0];
-        if(password != 'password1') {
+        if (password != "password1") {
           const valid = await bcrypt.compare(password, user.password);
           if (valid) return cb(null, user);
           return cb(null, false);

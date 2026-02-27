@@ -18,7 +18,7 @@
         <h1><a href="/" class="text-white text-decoration-none">Task Manager</a></h1>
       </div>
       <% if(currentProfile) { %>
-        <a href="/profile" id="profile-link" class="align-self-center nav-link">Welcome, <%= currentProfile.first_name %></a>
+        <a href="/profile" id="profile-link" class="align-self-center header-link">Welcome, <%= currentProfile.first_name %></a>
         <a href="/logout" class="align-self-center">
           <button class="btn text-white creds">Logout</button>
         </a>
@@ -35,13 +35,13 @@
     <nav id="bottom-nav">
       <div class="container text-center">
         <div class="d-flex flex-row justify-content-start gap-3">
-          <button class="btn text-white fw-semibold"><a href="/" class="nav-link">Dashboard</a></button>
-          <button class="btn text-white fw-semibold"><a href="/tasks" class="nav-link">Tasks</a></button>
+          <button class="btn text-white fw-semibold"><a href="/" class="header-link">Dashboard</a></button>
+          <button class="btn text-white fw-semibold"><a href="/tasks" class="header-link">Tasks</a></button>
           <button class="btn text-white fw-semibold">My Work</button>
           <button class="btn text-white fw-semibold">Activity</button>
           <button class="btn text-white fw-semibold">Health</button>
           <% if(currentProfile && currentProfile.role === "Admin") { %>
-             <button class="btn text-white fw-semibold"><a href="/admin" class="nav-link">Admin</a></button>
+             <button class="btn text-white fw-semibold"><a href="/admin" class="header-link">Admin</a></button>
           <% } %>
         </div>
       </div>

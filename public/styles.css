@@ -17,8 +17,14 @@ body {
 
 .nav-link {
     text-decoration: none;
+    color: black;
+}
+
+.header-link {
+    text-decoration: none;
     color: white;
 }
+
 .creds {
     min-width: 6rem;
 }
