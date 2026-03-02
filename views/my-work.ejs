@@ -1,0 +1,39 @@
+<%- include("../views/partials/header.ejs") %>
+<main>
+  <div class="container my-5">
+    <div class="card">
+      <div class="card-header">
+        <h1 class="text-center">My Work</h1>
+      </div>
+      <div class="card-body h-50">
+        <% if (pastTasks.length === 0) { %>
+          <p class="text-center">No tasks in the past 31 days.</p>
+        <% } else { %>
+            <table class="table">
+                <thead>
+                    <tr>
+                      <th scope="col">Assigner</th>
+                      <th scope="col">Task</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Due Date</th>
+                      <th scope="col">Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% pastTasks.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                      <tr>
+                        <td><%= task.first_name %></td>
+                        <td><%= task.title %></td>
+                        <td><%= task.status %></td>
+                        <td><%= date %></td>
+                        <td><%= task.priority %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include("../views/partials/footer.ejs") %>

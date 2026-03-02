@@ -37,10 +37,10 @@
         <div class="d-flex flex-row justify-content-start gap-3">
           <button class="btn text-white fw-semibold"><a href="/" class="header-link">Dashboard</a></button>
           <button class="btn text-white fw-semibold"><a href="/tasks" class="header-link">Tasks</a></button>
-          <button class="btn text-white fw-semibold">My Work</button>
-          <button class="btn text-white fw-semibold">Activity</button>
-          <button class="btn text-white fw-semibold">Health</button>
-          <% if(currentProfile && currentProfile.role === "Admin") { %>
+          <button class="btn text-white fw-semibold"><a href="/my-work" class="header-link">My Work</a></button>
+          <button class="btn text-white fw-semibold"><a href="/activity" class="header-link">Activity</a></button>
+          <button class="btn text-white fw-semibold"><a href="/health" class="header-link">Health</a></button>
+          <% if(currentProfile && (currentProfile.role === "Admin" || currentProfile.role === "Manager")) { %>
              <button class="btn text-white fw-semibold"><a href="/admin" class="header-link">Admin</a></button>
           <% } %>
         </div>

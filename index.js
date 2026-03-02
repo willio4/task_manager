@@ -64,7 +64,9 @@ function ensureLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect("/login");
 }
+
 app.get("/", (req, res) => {
+  console.log(res.locals.currentProfile);
   res.render("index.ejs", {
     year,
   });
@@ -79,9 +81,15 @@ app.get("/tasks", ensureLoggedIn, async (req, res) => {
       req.user.id,
     ],
   );
-   const tasksReceived = await db.query("select * from tasks inner join profiles on tasks.created_by = profiles.user_id where created_for = $1", [req.user.id]);
-   const tasksCreated = await db.query("select * from tasks inner join profiles on tasks.created_for = profiles.user_id where created_by = $1", [req.user.id]);
-  
+  const tasksReceived = await db.query(
+    "select * from tasks inner join profiles on tasks.created_by = profiles.user_id where created_for = $1",
+    [req.user.id],
+  );
+  const tasksCreated = await db.query(
+    "select * from tasks inner join profiles on tasks.created_for = profiles.user_id where created_by = $1",
+    [req.user.id],
+  );
+
   res.render("tasks.ejs", {
     year,
     employees: employees.rows,
@@ -121,6 +129,45 @@ app.post("/login", (req, res, next) => {
       }
     });
   })(req, res, next);
+});
+app.get("/activity", ensureLoggedIn, async (req, res) => {
+  const orgTasks = await db.query(
+    `SELECT title, description, priority, status, due_date, creator.first_name as created_by, worker.first_name as created_for  FROM public.tasks
+    left join profiles creator on tasks.created_by = creator.user_id
+    left join profiles worker on tasks.created_for = worker.user_id
+    where tasks.organization_id = $1
+    ORDER BY updated_at ASC `,
+    [res.locals.currentProfile.organization_id],
+  );
+  console.log(orgTasks.rows);
+  res.render("activity.ejs", {
+    year,
+    orgTasks: orgTasks.rows
+  });
+});
+
+app.get("/health", ensureLoggedIn, (req, res) => {
+  res.render("health.ejs", {
+    year,
+  });
+});
+
+app.get("/my-work", ensureLoggedIn, async (req, res) => {
+  const date = new Date();
+  const prior31days = new Date(date.getTime() - 1000 * 60 * 60 * 24 * 31);
+  try {
+    const pastTasks = await db.query(
+      "select * from tasks inner join profiles on tasks.created_by = profiles.user_id where created_for = $1 and due_date >= $2",
+      [req.user.id, prior31days],
+    );
+
+    res.render("my-work.ejs", {
+      year,
+      pastTasks: pastTasks.rows,
+    });
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 app.post("/create-task", ensureLoggedIn, async (req, res) => {
