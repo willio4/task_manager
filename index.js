@@ -43,7 +43,9 @@ app.use(async (req, res, next) => {
   if (req.user) {
     try {
       const result = await db.query(
-        "SELECT * FROM profiles WHERE user_id = $1",
+        `SELECT * 
+        FROM profiles 
+        WHERE user_id = $1`,
         [req.user.id],
       );
       res.locals.currentProfile = result.rows[0];
@@ -65,16 +67,57 @@ function ensureLoggedIn(req, res, next) {
   res.redirect("/login");
 }
 
-app.get("/", (req, res) => {
+app.get("/", ensureLoggedIn, async (req, res) => {
   console.log(res.locals.currentProfile);
+  const counts = await db.query(
+    `SELECT
+    COUNT(*) FILTER (WHERE status = 'Completed')   AS completed_count,
+    COUNT(*) FILTER (WHERE status = 'Incomplete')  AS incomplete_count,
+    COUNT(*) FILTER (WHERE status = 'Stuck')       AS stuck_count
+    FROM tasks;`,
+  );
+  
+  let total = 0;
+  counts.rows.forEach((row) => {
+    total +=
+      parseInt(row.completed_count) +
+      parseInt(row.incomplete_count) +
+      parseInt(row.stuck_count);
+  });
+
+  const userTasks = await db.query(
+    `SELECT title, first_name
+    FROM tasks
+    INNER JOIN profiles ON tasks.created_by = profiles.user_id
+    WHERE created_for = $1
+    ORDER BY due_date ASC;`,
+    [req.user.id],
+  )
+
+  const stuckTasks = await db.query(
+    `SELECT title, status
+    FROM tasks
+    WHERE organization_id = $1
+      AND status = 'Stuck'
+    ORDER BY priority DESC;`,
+    [res.locals.currentProfile.organization_id]
+  )
   res.render("index.ejs", {
     year,
+    counts: counts.rows,
+    total,
+    userTasks: userTasks.rows,
+    stuckTasks: stuckTasks.rows,
   });
 });
 
 app.get("/tasks", ensureLoggedIn, async (req, res) => {
   const employees = await db.query(
-    "SELECT * FROM profiles WHERE organization_id = $1 AND department = $2 AND user_id != $3",
+    `SELECT * 
+    FROM profiles 
+    WHERE organization_id = $1 
+      AND department = $2 
+      AND user_id != $3`,
     [
       res.locals.currentProfile.organization_id,
       res.locals.currentProfile.department,
@@ -82,11 +125,17 @@ app.get("/tasks", ensureLoggedIn, async (req, res) => {
     ],
   );
   const tasksReceived = await db.query(
-    "select * from tasks inner join profiles on tasks.created_by = profiles.user_id where created_for = $1",
+    `select * 
+    from tasks 
+    inner join profiles on tasks.created_by = profiles.user_id 
+    where created_for = $1`,
     [req.user.id],
   );
   const tasksCreated = await db.query(
-    "select * from tasks inner join profiles on tasks.created_for = profiles.user_id where created_by = $1",
+    `select * 
+    from tasks 
+    inner join profiles on tasks.created_for = profiles.user_id 
+    where created_by = $1`,
     [req.user.id],
   );
 
@@ -117,9 +166,12 @@ app.post("/login", (req, res, next) => {
     req.logIn(user, async (err) => {
       if (err) return next(err);
 
-      let result = await db.query("SELECT * FROM profiles WHERE user_id = $1", [
-        req.user.id,
-      ]);
+      let result = await db.query(
+        `SELECT * 
+        FROM profiles 
+        WHERE user_id = $1`,
+        [req.user.id],
+      );
 
       if (result.rows.length > 0) {
         const profile = result.rows[0];
@@ -142,7 +194,7 @@ app.get("/activity", ensureLoggedIn, async (req, res) => {
   console.log(orgTasks.rows);
   res.render("activity.ejs", {
     year,
-    orgTasks: orgTasks.rows
+    orgTasks: orgTasks.rows,
   });
 });
 
@@ -157,7 +209,11 @@ app.get("/my-work", ensureLoggedIn, async (req, res) => {
   const prior31days = new Date(date.getTime() - 1000 * 60 * 60 * 24 * 31);
   try {
     const pastTasks = await db.query(
-      "select * from tasks inner join profiles on tasks.created_by = profiles.user_id where created_for = $1 and due_date >= $2",
+      `select * 
+      from tasks 
+      inner join profiles on tasks.created_by = profiles.user_id 
+      where created_for = $1 
+        and due_date >= $2`,
       [req.user.id, prior31days],
     );
 
@@ -175,13 +231,14 @@ app.post("/create-task", ensureLoggedIn, async (req, res) => {
 
   try {
     await db.query(
-      "insert into tasks(organization_id, title, description, priority, status, due_date, created_by, created_for) values($1, $2, $3, $4, $5, $6, $7, $8)",
+      `insert into tasks(organization_id, title, description, priority, status, due_date, created_by, created_for) 
+      values($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         res.locals.currentProfile.organization_id,
         task,
         taskDescription,
         priority,
-        "incomplete",
+        "Incomplete",
         dueDate,
         req.user.id,
         assignee,
@@ -203,7 +260,9 @@ app.get("/create-account", (req, res) => {
 app.post("/create-account", async (req, res) => {
   const { fName, lName, email, role } = req.body;
   const result = await db.query(
-    "INSERT INTO profiles(user_id, first_name, last_name, role) VALUES($1,$2,$3,$4) RETURNING *",
+    `INSERT INTO profiles(user_id, first_name, last_name, role) 
+    VALUES($1,$2,$3,$4) 
+    RETURNING *`,
     [req.user.id, fName, lName, role],
   );
 
@@ -219,7 +278,9 @@ app.get("/signup", (req, res) => {
 app.get("/admin", ensureLoggedIn, async (req, res) => {
   try {
     const result = await db.query(
-      "select * from organizations where owner_id = $1",
+      `select * 
+      from organizations 
+      where owner_id = $1`,
       [req.user.id],
     );
     const org = result.rows[0];
@@ -232,12 +293,16 @@ app.get("/admin", ensureLoggedIn, async (req, res) => {
 app.post("/admin/create-manager", ensureLoggedIn, async (req, res) => {
   const { manEmail, manPassword, manFirst, manLast, manRole } = req.body;
   const userResult = await db.query(
-    "Insert into users(email, password) values($1, $2) returning *",
+    `Insert into users(email, password) 
+    values($1, $2) 
+    returning *`,
     [manEmail, manPassword],
   );
   const managerId = userResult.rows[0].id;
   const profileResult = await db.query(
-    "insert into profiles(user_id, first_name, last_name, role, organization_id) values($1, $2, $3, $4, $5) returning *",
+    `insert into profiles(user_id, first_name, last_name, role, organization_id) 
+    values($1, $2, $3, $4, $5) 
+    returning *`,
     [
       managerId,
       manFirst,
@@ -260,12 +325,16 @@ app.post("/admin/create-supervisor", ensureLoggedIn, async (req, res) => {
     supeDepartment,
   } = req.body;
   const userResult = await db.query(
-    "Insert into users(email, password) values($1, $2) returning *",
+    `Insert into users(email, password) 
+    values($1, $2) 
+    returning *`,
     [supeEmail, supePassword],
   );
   const supervisorId = userResult.rows[0].id;
   const profileResult = await db.query(
-    "insert into profiles(user_id, first_name, last_name, role, department, organization_id) values($1, $2, $3, $4, $5, $6) returning *",
+    `insert into profiles(user_id, first_name, last_name, role, department, organization_id) 
+    values($1, $2, $3, $4, $5, $6) 
+    returning *`,
     [
       supervisorId,
       supeFirst,
@@ -283,12 +352,16 @@ app.post("/admin/create-associate", ensureLoggedIn, async (req, res) => {
   const { empEmail, empPassword, empFirst, empLast, empRole, empDepartment } =
     req.body;
   const userResult = await db.query(
-    "Insert into users(email, password) values($1, $2) returning *",
+    `Insert into users(email, password) 
+    values($1, $2) 
+    returning *`,
     [empEmail, empPassword],
   );
   const associateId = userResult.rows[0].id;
   const profileResult = await db.query(
-    "insert into profiles(user_id, first_name, last_name, role, department, organization_id) values($1, $2, $3, $4, $5, $6) returning *",
+    `insert into profiles(user_id, first_name, last_name, role, department, organization_id) 
+    values($1, $2, $3, $4, $5, $6) 
+    returning *`,
     [
       associateId,
       empFirst,
@@ -304,12 +377,18 @@ app.post("/admin/create-associate", ensureLoggedIn, async (req, res) => {
 app.post("/admin", ensureLoggedIn, async (req, res) => {
   const { orgName } = req.body;
   const result = await db.query(
-    "INSERT INTO organizations(org_name, owner_id) VALUES($1, $2) RETURNING *",
+    `INSERT INTO organizations(org_name, owner_id) 
+    VALUES($1, $2) 
+    RETURNING *
+    `,
     [orgName, req.user.id],
   );
 
   await db.query(
-    "update profiles set organization_id = $1 where user_id = $2",
+    `update profiles 
+     set organization_id = $1 
+     where user_id = $2
+    `,
     [result.rows[0].id, req.user.id],
   );
 
@@ -323,9 +402,12 @@ app.post("/signup", async (req, res, next) => {
     return res.send("Passwords do not match.");
   }
 
-  const results = await db.query("SELECT * FROM users WHERE email = $1", [
-    email,
-  ]);
+  const results = await db.query(
+    `SELECT * 
+    FROM users 
+    WHERE email = $1`,
+    [email],
+  );
 
   if (results.rows.length > 0) {
     return res.send("Account already exists.");
@@ -334,7 +416,9 @@ app.post("/signup", async (req, res, next) => {
   const hash = await bcrypt.hash(password, 10);
 
   const result = await db.query(
-    "INSERT INTO users(email, password) VALUES($1, $2) RETURNING *",
+    `INSERT INTO users(email, password) 
+    VALUES($1, $2) 
+    RETURNING *`,
     [email, hash],
   );
 
@@ -358,9 +442,13 @@ passport.use(
     { usernameField: "email", passwordField: "password" },
     async function verify(email, password, cb) {
       try {
-        const result = await db.query("SELECT * FROM users WHERE email = $1", [
-          email,
-        ]);
+        const result = await db.query(
+          `
+          SELECT * 
+          FROM users 
+          WHERE email = $1`,
+          [email],
+        );
         if (result.rows.length === 0) return cb(null, false);
 
         const user = result.rows[0];
@@ -383,7 +471,12 @@ passport.serializeUser((user, cb) => {
 });
 
 passport.deserializeUser(async (id, cb) => {
-  const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+  const result = await db.query(
+    `SELECT * 
+     FROM users 
+     WHERE id = $1`,
+    [id],
+  );
   cb(null, result.rows[0]);
 });
 
