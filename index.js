@@ -67,6 +67,14 @@ function ensureLoggedIn(req, res, next) {
   res.redirect("/login");
 }
 
+function ensureAdmin(req, res, next) {
+  if(res.locals.currentProfile && (res.locals.currentProfile.role === 'Admin' || res.locals.currentProfile.role === 'Manager')) {
+    return next();
+  } else {
+    return res.send("You are not authorized to view this page.");
+  }
+}
+
 app.get("/", ensureLoggedIn, async (req, res) => {
   console.log(res.locals.currentProfile);
   const counts = await db.query(
@@ -275,7 +283,7 @@ app.get("/signup", (req, res) => {
   });
 });
 
-app.get("/admin", ensureLoggedIn, async (req, res) => {
+app.get("/admin", ensureLoggedIn, ensureAdmin, async (req, res) => {
   try {
     const result = await db.query(
       `select * 
@@ -290,7 +298,7 @@ app.get("/admin", ensureLoggedIn, async (req, res) => {
   }
 });
 
-app.post("/admin/create-manager", ensureLoggedIn, async (req, res) => {
+app.post("/admin/create-manager", ensureLoggedIn, ensureAdmin, async (req, res) => {
   const { manEmail, manPassword, manFirst, manLast, manRole } = req.body;
   const userResult = await db.query(
     `Insert into users(email, password) 
@@ -315,7 +323,7 @@ app.post("/admin/create-manager", ensureLoggedIn, async (req, res) => {
   res.redirect("/admin");
 });
 
-app.post("/admin/create-supervisor", ensureLoggedIn, async (req, res) => {
+app.post("/admin/create-supervisor", ensureLoggedIn, ensureAdmin, async (req, res) => {
   const {
     supeEmail,
     supePassword,
@@ -348,7 +356,7 @@ app.post("/admin/create-supervisor", ensureLoggedIn, async (req, res) => {
   res.redirect("/admin");
 });
 
-app.post("/admin/create-associate", ensureLoggedIn, async (req, res) => {
+app.post("/admin/create-associate", ensureLoggedIn, ensureAdmin, async (req, res) => {
   const { empEmail, empPassword, empFirst, empLast, empRole, empDepartment } =
     req.body;
   const userResult = await db.query(
@@ -374,7 +382,9 @@ app.post("/admin/create-associate", ensureLoggedIn, async (req, res) => {
   res.redirect("/admin");
 });
 
-app.post("/admin", ensureLoggedIn, async (req, res) => {
+
+
+app.post("/admin", ensureLoggedIn, ensureAdmin, async (req, res) => {
   const { orgName } = req.body;
   const result = await db.query(
     `INSERT INTO organizations(org_name, owner_id) 
