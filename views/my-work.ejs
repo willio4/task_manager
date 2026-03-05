@@ -20,7 +20,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% pastTasks.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                    <% pastTasks.forEach(task => { const date = task.due_date.toDateString().slice(4,15)%>
                       <tr>
                         <td><%= task.first_name %></td>
                         <td><%= task.title %></td>

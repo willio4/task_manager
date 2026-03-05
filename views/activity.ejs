@@ -3,7 +3,7 @@
   <div class="container my-5">
     <div class="card">
       <div class="card-header">
-        <h1 class="text-center">My Work</h1>
+        <h1 class="text-center">Live Updates</h1>
       </div>
       <div class="card-body h-50">
         <% if (orgTasks.length === 0) { %>
@@ -21,7 +21,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% orgTasks.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                    <% orgTasks.forEach(task => { const date = task.due_date.toDateString().slice(4,15)%>
                       <tr>
                         <td><%= task.created_by %></td>
                         <td><%= task.created_for %></td>

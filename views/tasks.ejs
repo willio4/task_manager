@@ -1,11 +1,11 @@
 <%- include("../views/partials/header.ejs") %>
 <main>
-  <h1 class="text-center">My Tasks</h1>
-  <div class="container text-center">
+  <div class="container text-center mt-5">
     <div class="row">
       <div class="col">
         <div class="card">
           <div class="card-header">
+            <h1 class="text-center">Tasks</h1>
             <ul class="nav nav-pills card-header-pills my-1" role="tablist">
               <li class="nav-item" role="presentation">
                 <button
@@ -54,7 +54,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% tasksReceived.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                    <% tasksReceived.forEach(task => { const date = task.due_date.toDateString().slice(4,15)%>
                       <tr>
                         <th scope="row"><input type="checkbox" <%= task.status === "complete" ? "checked" : "" %>></th>
                         <td><%= task.first_name %></td>
@@ -82,7 +82,7 @@
                 <table class="table">
                   <thead>
                     <tr>
-                      <th scope="col">Assignee</th>
+                      <th scope="col">For</th>
                       <th scope="col">Task</th>
                       <th scope="col">Status</th>
                       <th scope="col">Due Date</th>
@@ -90,7 +90,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% tasksCreated.forEach(task => { const date = task.due_date.toISOString().slice(0,10)%>
+                    <% tasksCreated.forEach(task => { const date = task.due_date.toDateString().slice(4,15)%>
                       <tr>
                         <td><%= task.first_name %></td>
                         <td><%= task.title %></td>
@@ -162,6 +162,7 @@
               class="form-control"
               id="dueDate"
               name="dueDate"
+              value="<%= today %>"
               >
           </div>
         

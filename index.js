@@ -147,11 +147,16 @@ app.get("/tasks", ensureLoggedIn, async (req, res) => {
     [req.user.id],
   );
 
+  const date = new Date();
+  const today = date.toISOString().slice(0,10);
+  console.log(today);
+
   res.render("tasks.ejs", {
     year,
     employees: employees.rows,
     tasksReceived: tasksReceived.rows,
     tasksCreated: tasksCreated.rows,
+    today
   });
 });
 
@@ -196,7 +201,7 @@ app.get("/activity", ensureLoggedIn, async (req, res) => {
     left join profiles creator on tasks.created_by = creator.user_id
     left join profiles worker on tasks.created_for = worker.user_id
     where tasks.organization_id = $1
-    ORDER BY updated_at ASC `,
+    ORDER BY updated_at DESC;`,
     [res.locals.currentProfile.organization_id],
   );
   console.log(orgTasks.rows);
