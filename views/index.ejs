@@ -81,7 +81,7 @@
           <div class="card-body">
             <ul class="card-text">
               <% if(stuckTasks.length > 0) { stuckTasks.forEach(task => { %> 
-                <li><%= task.title %> - <%= task.first_name %></li>
+                <li><%= task.first_name %> - "<%= task.title %>" </li>
               <% }) } else { %>
                 <p class="text-center text-muted m-0">No Stuck tasks</p>
               <% } %>
@@ -119,7 +119,7 @@ new Chart(ctx, {
       legend: { position: 'bottom' }
     },
     scales: {
-      x: { stacked: true, beginAtZero: true },
+      x: { stacked: true, beginAtZero: true, ticks: {stepSize: 1}},
       y: { stacked: true }
     }
   }

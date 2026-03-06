@@ -106,13 +106,16 @@ app.get("/", ensureLoggedIn, async (req, res) => {
   );
 
   const stuckTasksResult = await db.query(
-    `SELECT title, status
+    `SELECT title, status, first_name
      FROM tasks
-     WHERE organization_id = $1
+     inner join profiles on tasks.created_by = profiles.user_id
+     WHERE tasks.organization_id = $1
        AND status = 'Stuck'
      ORDER BY priority DESC;`,
     [res.locals.currentProfile.organization_id]
   );
+
+  console.log(stuckTasksResult.rows)
 
   const depTasksResult = await db.query(
     `SELECT 
