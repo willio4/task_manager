@@ -15,6 +15,10 @@ body {
     display: none;
 }
 
+.health-chart {
+    min-height: 20rem;
+}
+
 .nav-link {
     text-decoration: none;
     color: black;

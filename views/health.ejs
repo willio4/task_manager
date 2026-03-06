@@ -1,5 +1,178 @@
 <%- include("../views/partials/header.ejs") %>
 <main>
-    
+  <div class="container my-4">
+    <h2>Health Check</h2>
+    <p class="lead">All systems are operational.</p>
+    <div class="d-flex flex-column">
+      <!-- Data Department -->
+      <p class="d-inline-flex" id="dataDepChart">
+        <button
+          class="btn btn-primary"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseData"
+          aria-expanded="false"
+          aria-controls="collapseData"
+        >
+          Data Department
+        </button>
+      </p>
+      <div class="collapse" id="collapseData">
+        <div class="card card-body mb-3">
+          <div class="row health-chart">
+            <canvas class="col-md-6" id="dataChart"></canvas>
+            <div class="col">
+              <div
+                class="row justify-content-center text-muted h-50 align-items-center"
+              >
+                Stuck Tasks
+              </div>
+              <div
+                class="row justify-content-center text-muted h-50 align-items-center"
+              >
+                Pie Chart
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketing Department -->
+      <p class="d-inline-flex">
+        <button
+          class="btn btn-primary"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseMarketing"
+          aria-expanded="false"
+          aria-controls="collapseExample"
+        >
+          Marketing Department
+        </button>
+      </p>
+      <div class="collapse" id="collapseMarketing">
+        <div class="card card-body mb-3">
+          <div class="row health-chart">
+            <canvas class="col-md-6" id="marketingChart"></canvas>
+            <div class="col">
+              <div
+                class="row justify-content-center text-muted h-50 align-items-center"
+              >
+                Stuck Tasks
+              </div>
+              <div
+                class="row justify-content-center text-muted h-50 align-items-center"
+              >
+                Pie Chart
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Operations Department -->
+      <p class="d-inline-flex">
+        <button
+          class="btn btn-primary"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOperations"
+          aria-expanded="false"
+          aria-controls="collapseExample"
+        >
+          Operations Department
+        </button>
+      </p>
+      <div class="collapse" id="collapseOperations">
+        <div class="card card-body mb-3">
+          <div class="row health-chart">
+            <canvas class="col-md-6" id="operationsChart"></canvas>
+            <div class="col">
+              <div
+                class="row justify-content-center text-muted h-50 align-items-center"
+              >
+                Stuck Tasks
+              </div>
+              <div
+                class="row justify-content-center text-muted h-50 align-items-center"
+              >
+                Pie Chart
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const collapseDataEl = document.getElementById("collapseData");
+  const dataButton = document.querySelector('[data-bs-target="#collapseData"]');
+
+  collapseDataEl.addEventListener("shown.bs.collapse", () => {
+    dataButton.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  const collapseMarketingEl = document.getElementById("collapseMarketing");
+  const marketingButton = document.querySelector(
+    '[data-bs-target="#collapseMarketing"]',
+  );
+  collapseMarketingEl.addEventListener("shown.bs.collapse", () => {
+    marketingButton.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  const collapseOperationsEl = document.getElementById("collapseOperations");
+  const operationsButton = document.querySelector(
+    '[data-bs-target="#collapseOperations"]',
+  );
+  collapseOperationsEl.addEventListener("shown.bs.collapse", () => {
+    operationsButton.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  const dataBarCtx = document.getElementById("dataChart").getContext("2d");
+  new Chart(dataBarCtx, {
+    type: "bar",
+    data: {
+      datasets: [
+        {
+          data: [12, 19, 8, 13],
+        },
+      ],
+      labels: ["Alice", "Bob", "Charlie", "David"],
+    },
+  });
+
+  const marketingBarCtx = document
+    .getElementById("marketingChart")
+    .getContext("2d");
+  new Chart(marketingBarCtx, {
+    type: "bar",
+    data: {
+      datasets: [
+        {
+          data: [10, 15, 5, 20],
+        },
+      ],
+      labels: ["Dirk", "Eve", "Frank", "Grace"],
+    },
+  });
+
+  const OperationsBarCtx = document
+    .getElementById("operationsChart")
+    .getContext("2d");
+  new Chart(OperationsBarCtx, {
+    type: "bar",
+    data: {
+      datasets: [
+        {
+          data: [5, 25, 10, 15],
+        },
+      ],
+      labels: ["Kevin", "Laura", "Mallory", "Nina"],
+    },
+  });
+</script>
 <%- include("../views/partials/footer.ejs") %>
