@@ -122,7 +122,8 @@ app.get("/", ensureLoggedIn, async (req, res) => {
     p.user_id,
     p.first_name,
     COUNT(t.id) AS total_tasks,
-    COALESCE(SUM(CASE WHEN t.status = 'Completed' THEN 1 ELSE 0 END), 0) AS completed_tasks
+    COALESCE(SUM(CASE WHEN t.status = 'Completed' THEN 1 ELSE 0 END), 0) AS completed_tasks,
+    COALESCE(SUM(CASE WHEN t.status = 'Stuck' THEN 1 ELSE 0 END), 0) AS stuck_tasks
     FROM profiles p
     LEFT JOIN tasks t ON t.created_for = p.user_id AND t.organization_id = $2
     WHERE p.department = $1
@@ -142,8 +143,13 @@ const depData = {
       backgroundColor: '#4CAF50'
     },
     {
+      label: 'Stuck',
+      data: depRow.map(r => (r.stuck_tasks)), 
+      backgroundColor: '#ea2d14'
+    },
+    {
       label: 'Remaining',
-      data: depRow.map(r => Number(r.total_tasks) - Number(r.completed_tasks)),
+      data: depRow.map(r => (r.total_tasks) - (r.completed_tasks) - (r.stuck_tasks)),
       backgroundColor: '#E0E0E0'
     }
   ]
