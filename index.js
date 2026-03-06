@@ -44,7 +44,8 @@ app.use(async (req, res, next) => {
     try {
       const result = await db.query(
         `SELECT * 
-        FROM profiles 
+        FROM profiles
+        INNER JOIN organizations ON profiles.organization_id = organizations.id
         WHERE user_id = $1`,
         [req.user.id],
       );
@@ -76,46 +77,96 @@ function ensureAdmin(req, res, next) {
 }
 
 app.get("/", ensureLoggedIn, async (req, res) => {
-  console.log(res.locals.currentProfile);
-  const counts = await db.query(
+
+  const countsResult = await db.query(
     `SELECT
-    COUNT(*) FILTER (WHERE status = 'Completed')   AS completed_count,
-    COUNT(*) FILTER (WHERE status = 'Incomplete')  AS incomplete_count,
-    COUNT(*) FILTER (WHERE status = 'Stuck')       AS stuck_count
-    FROM tasks;`,
-  );
-  
-  let total = 0;
-  counts.rows.forEach((row) => {
-    total +=
-      parseInt(row.completed_count) +
-      parseInt(row.incomplete_count) +
-      parseInt(row.stuck_count);
-  });
-
-  const userTasks = await db.query(
-    `SELECT title, first_name
+      COUNT(*) FILTER (WHERE status = 'Completed') AS completed_count,
+      COUNT(*) FILTER (WHERE status = 'Incomplete') AS incomplete_count,
+      COUNT(*) FILTER (WHERE status = 'Stuck') AS stuck_count
     FROM tasks
-    INNER JOIN profiles ON tasks.created_by = profiles.user_id
-    WHERE created_for = $1
-    ORDER BY due_date ASC;`,
-    [req.user.id],
-  )
-
-  const stuckTasks = await db.query(
-    `SELECT title, status
-    FROM tasks
-    WHERE organization_id = $1
-      AND status = 'Stuck'
-    ORDER BY priority DESC;`,
+    WHERE organization_id = $1;`,
     [res.locals.currentProfile.organization_id]
-  )
+  );
+
+  const row = countsResult.rows[0];
+  const completed = Number(row.completed_count);
+  const incomplete = Number(row.incomplete_count);
+  const stuck = Number(row.stuck_count);
+
+  const total = completed + incomplete + stuck;
+
+
+  const userTasksResult = await db.query(
+    `SELECT title, first_name
+     FROM tasks
+     INNER JOIN profiles ON tasks.created_by = profiles.user_id
+     WHERE created_for = $1
+     ORDER BY due_date ASC;`,
+    [req.user.id]
+  );
+
+  const stuckTasksResult = await db.query(
+    `SELECT title, status
+     FROM tasks
+     WHERE organization_id = $1
+       AND status = 'Stuck'
+     ORDER BY priority DESC;`,
+    [res.locals.currentProfile.organization_id]
+  );
+
+  const depTasksResult = await db.query(
+    `SELECT 
+    p.user_id,
+    p.first_name,
+    COUNT(t.id) AS total_tasks,
+    COALESCE(SUM(CASE WHEN t.status = 'Completed' THEN 1 ELSE 0 END), 0) AS completed_tasks
+    FROM profiles p
+    LEFT JOIN tasks t ON t.created_for = p.user_id AND t.organization_id = $2
+    WHERE p.department = $1
+    GROUP BY p.user_id, p.first_name
+    ORDER BY p.first_name;`,
+    [res.locals.currentProfile.department, res.locals.currentProfile.organization_id]
+  );
+
+  const depRow = depTasksResult.rows; 
+
+const depData = {
+  labels: depRow.map(r => r.first_name),
+  datasets: [
+    {
+      label: 'Completed',
+      data: depRow.map(r => Number(r.completed_tasks)), 
+      backgroundColor: '#4CAF50'
+    },
+    {
+      label: 'Remaining',
+      data: depRow.map(r => Number(r.total_tasks) - Number(r.completed_tasks)),
+      backgroundColor: '#E0E0E0'
+    }
+  ]
+};
+
+  const orgData = {
+    labels: ['Completed', 'Incomplete', 'Stuck'],
+    datasets: [{
+      label: 'Organization Tasks',
+      data: [completed, incomplete, stuck], 
+      borderWidth: 1,
+      backgroundColor: ['#4CAF50', '#FFC107', '#F44336'] 
+    }]
+  };
+
+  console.log("Org Data:", orgData);
+  console.log("Dep Data:", depData);
+
   res.render("index.ejs", {
     year,
-    counts: counts.rows,
+    counts: row,
     total,
-    userTasks: userTasks.rows,
-    stuckTasks: stuckTasks.rows,
+    userTasks: userTasksResult.rows,
+    stuckTasks: stuckTasksResult.rows,
+    orgData,
+    depData,
   });
 });
 
@@ -149,7 +200,6 @@ app.get("/tasks", ensureLoggedIn, async (req, res) => {
 
   const date = new Date();
   const today = date.toISOString().slice(0,10);
-  console.log(today);
 
   res.render("tasks.ejs", {
     year,
@@ -204,7 +254,7 @@ app.get("/activity", ensureLoggedIn, async (req, res) => {
     ORDER BY updated_at DESC;`,
     [res.locals.currentProfile.organization_id],
   );
-  console.log(orgTasks.rows);
+
   res.render("activity.ejs", {
     year,
     orgTasks: orgTasks.rows,

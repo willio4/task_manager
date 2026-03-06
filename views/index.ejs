@@ -16,7 +16,7 @@
         <div class="card text-dark bg-light mb-3 top-card">
           <div class="card-header">Incomplete</div>
           <div class="card-body">
-            <p class="card-text"><%= counts[0].incomplete_count %></p>
+            <p class="card-text"><%= counts.incomplete_count %></p>
           </div>
         </div>
       </div>
@@ -24,15 +24,15 @@
         <div class="card text-dark bg-light mb-3 top-card">
           <div class="card-header">Stuck</div>
           <div class="card-body">
-            <p class="card-text"><%= counts[0].stuck_count %></p>
+            <p class="card-text"><%= counts.stuck_count %></p>
           </div>
         </div>
       </div>
       <div class="col">
         <div class="card text-dark bg-light mb-3 top-card">
-          <div class="card-header">Complete</div>
+          <div class="card-header">Completed</div>
           <div class="card-body">
-            <p class="card-text"><%= counts[0].completed_count %></p>
+            <p class="card-text"><%= counts.completed_count %></p>
           </div>
         </div>
       </div>
@@ -42,10 +42,20 @@
         <div class="card text-dark bg-light mb-3">
           <div class="card-header">Overview:</div>
           <div class="card-body">
-            <p id="overview" class="card-text">
-              charts and graphs depicting the overall work based on the users
-              group
-            </p>
+            <div class="container text-center">
+              <div class="row border-bottom">
+                <h4 class="col"> <%= currentProfile.org_name %> </h4>
+                <h4 class="col"><%= currentProfile.department %></h4>
+              </div>
+              <div class="row my-5">
+                <div style="width: 400px; height: 400px; margin: 0 auto;">
+                  <canvas id="orgChart"></canvas>
+                </div>
+                <div style="width: 400px; height: 400px; margin: 0 auto;">
+                  <canvas id="depChart"></canvas>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -82,5 +92,38 @@
     </div>
   </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const org = document.getElementById('orgChart');
+  new Chart(org, {
+    type: 'doughnut',
+    data: <%- JSON.stringify(orgData) %>,
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  const ctx = document.getElementById('depChart').getContext('2d');
+
+new Chart(ctx, {
+  type: 'bar',
+  data: <%- JSON.stringify(depData) %>,
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' }
+    },
+    scales: {
+      x: { stacked: true, beginAtZero: true },
+      y: { stacked: true }
+    }
+  }
+});
+</script>
 
 <%- include("../views/partials/footer.ejs") %>
