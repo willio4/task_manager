@@ -1,54 +1,69 @@
 <%- include("../views/partials/header.ejs") %>
-<main>
-  <div class="container my-5">
-  <h3 class="text-center">Create Account:</h3>
-  <div class="container my-4">
+
+<main class="container d-flex justify-content-center align-items-center" style="min-height:70vh;">
+
+  <div class="card shadow p-4" style="max-width: 500px; width:100%;">
+
+    <h3 class="text-center mb-4">Create Account</h3>
+
     <form action="/create-account" method="POST">
-      <div class="form-group">
-        <label for="fName" class="form-label">First Name:</label><br />
+
+      <div class="mb-3">
+        <label for="fName" class="form-label">First Name</label>
         <input
           type="text"
           class="form-control"
           id="fName"
           name="fName"
           required
-        /><br />
+        >
       </div>
-      <div class="form-group">
-        <label for="lName" class="form-label mt-4">Last Name:</label><br />
+
+      <div class="mb-3">
+        <label for="lName" class="form-label">Last Name</label>
         <input
           type="text"
           class="form-control"
           id="lName"
           name="lName"
           required
-        /><br />
+        >
       </div>
-      <div class="form-group">
-        <label for="email" class="form-label mt-4">Email Address:</label><br />
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email Address</label>
         <input
           type="email"
           class="form-control"
           id="email"
           name="email"
-          value=<%=currentUser.email%>
+          value="<%= currentUser.email %>"
           required
-        /><br />
+        >
       </div>
-      <h5 class="mt-4">Select Role:</h5>
-      <div class="form-group">
-        <input type="radio" id="admin" name="role" value="Admin" />
-        <label for="admin">Admin</label><br />
-        <input type="radio" id="depHead" name="role" value="Department Head" />
-        <label for="depHead">Department Head</label><br />
-        <input type="radio" id="associate" name="role" value="Associate" required/>
-        <label for="associate">Associate</label><br />
+
+      <h5 class="mt-4 mb-2">Select Role</h5>
+      <div class="mb-4">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="admin" name="role" value="Admin">
+          <label class="form-check-label" for="admin">Admin</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="depHead" name="role" value="Department Head">
+          <label class="form-check-label" for="depHead">Department Head</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="associate" name="role" value="Associate" required>
+          <label class="form-check-label" for="associate">Associate</label>
+        </div>
       </div>
-      <button type="submit" class="d-flex justify-content-center btn btn-primary mt-4">
-        Create Account
-      </button>
+
+      <button type="submit" class="btn btn-primary w-100" style="color: black;">Create Account</button>
+
     </form>
+
   </div>
-  </div>
+
 </main>
+
 <%- include("../views/partials/footer.ejs") %>

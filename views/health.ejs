@@ -8,6 +8,7 @@
       <p class="d-inline-flex" id="dataDepChart">
         <button
           class="btn btn-primary"
+          style="color: black;"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseData"
@@ -20,17 +21,25 @@
       <div class="collapse" id="collapseData">
         <div class="card card-body mb-3">
           <div class="row health-chart">
-            <canvas class="col-md-6" id="dataChart"></canvas>
+            <canvas class="col-md-6" id="DataChart"></canvas>
             <div class="col">
               <div
-                class="row justify-content-center text-muted h-50 align-items-center"
+                class="row justify-content-center h-50 align-items-center"
               >
-                Stuck Tasks
+                <h5 class="text-center">Stuck Tasks</h5>
+                <ul>
+                  <% if(stuckTasks.Data && stuckTasks.Data.length > 0) { stuckTasks.Data.forEach(task => { %> 
+                    <li><%= task.first_name %> - "<%= task.title %>" </li>
+                  <% }) } else { %>
+                    <p class="text-center m-0">No Stuck tasks</p>
+                  <% } %>
+                </ul>
+
               </div>
               <div
-                class="row justify-content-center text-muted h-50 align-items-center"
+                class="row justify-content-center h-50 w-100 align-items-center"
               >
-                Pie Chart
+                <canvas id="DataPieChart"></canvas>
               </div>
             </div>
           </div>
@@ -41,6 +50,7 @@
       <p class="d-inline-flex">
         <button
           class="btn btn-primary"
+          style="color: black;"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseMarketing"
@@ -53,17 +63,24 @@
       <div class="collapse" id="collapseMarketing">
         <div class="card card-body mb-3">
           <div class="row health-chart">
-            <canvas class="col-md-6" id="marketingChart"></canvas>
+            <canvas class="col-md-6" id="MarketingChart"></canvas>
             <div class="col">
               <div
-                class="row justify-content-center text-muted h-50 align-items-center"
+                class="row justify-content-center h-50 align-items-center"
               >
-                Stuck Tasks
+                <h5 class="text-center">Stuck Tasks</h5>
+                <ul>
+                  <% if(stuckTasks.Marketing && stuckTasks.Marketing.length > 0) { stuckTasks.Marketing.forEach(task => { %> 
+                    <li><%= task.first_name %> - "<%= task.title %>" </li>
+                  <% }) } else { %>
+                    <p class="text-center m-0">No Stuck tasks</p>
+                  <% } %>
+                </ul>
               </div>
               <div
-                class="row justify-content-center text-muted h-50 align-items-center"
+                class="row justify-content-center h-50 align-items-center"
               >
-                Pie Chart
+                <canvas id="MarketingPieChart"></canvas>
               </div>
             </div>
           </div>
@@ -74,6 +91,7 @@
       <p class="d-inline-flex">
         <button
           class="btn btn-primary"
+          style="color: black;"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseOperations"
@@ -86,17 +104,24 @@
       <div class="collapse" id="collapseOperations">
         <div class="card card-body mb-3">
           <div class="row health-chart">
-            <canvas class="col-md-6" id="operationsChart"></canvas>
+            <canvas class="col-md-6" id="OperationsChart"></canvas>
             <div class="col">
               <div
-                class="row justify-content-center text-muted h-50 align-items-center"
+                class="row justify-content-center h-50 align-items-center"
               >
-                Stuck Tasks
+                <h5 class="text-center">Stuck Tasks</h5>
+                <ul>
+                  <% if(stuckTasks.Operations && stuckTasks.Operations.length > 0) { stuckTasks.Operations.forEach(task => { %> 
+                    <li><%= task.first_name %> - "<%= task.title %>" </li>
+                  <% }) } else { %>
+                    <p class="text-center m-0">No Stuck tasks</p>
+                  <% } %>
+                </ul>
               </div>
               <div
-                class="row justify-content-center text-muted h-50 align-items-center"
+                class="row justify-content-center h-50 align-items-center"
               >
-                Pie Chart
+                <canvas id="OperationsPieChart"></canvas>
               </div>
             </div>
           </div>
@@ -109,70 +134,104 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  const collapseDataEl = document.getElementById("collapseData");
-  const dataButton = document.querySelector('[data-bs-target="#collapseData"]');
+  const departmentBarData = <%- JSON.stringify(barChart) %>;
 
-  collapseDataEl.addEventListener("shown.bs.collapse", () => {
-    dataButton.scrollIntoView({ behavior: "smooth", block: "start" });
+
+
+  document.querySelectorAll(".collapse").forEach((collapse) => {
+    collapse.addEventListener("shown.bs.collapse", () => {
+      const button = document.querySelector(
+        `[data-bs-target="#${collapse.id}"]`
+      );
+      if (button) {
+        button.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   });
 
-  const collapseMarketingEl = document.getElementById("collapseMarketing");
-  const marketingButton = document.querySelector(
-    '[data-bs-target="#collapseMarketing"]',
-  );
-  collapseMarketingEl.addEventListener("shown.bs.collapse", () => {
-    marketingButton.scrollIntoView({ behavior: "smooth", block: "start" });
+  Object.entries(departmentBarData).forEach(([department, users]) => {
+    const canvas = document.getElementById(`${department}Chart`);
+    if (!canvas) return;
+
+    const labels = users.map((u) => u.user);
+    const completed = users.map((u) => u.completed);
+    const total = users.map((u) => u.total);
+
+    new Chart(canvas.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Completed Tasks",
+            data: completed,
+            backgroundColor: "rgba(54, 162, 235, 0.9)",
+            borderColor: "rgba(25, 118, 210, 1)",
+            borderWidth: 1
+          },
+          {
+            label: "Total Tasks",
+            data: total,
+            backgroundColor: "rgba(220, 230, 240, 0.6)",
+            borderColor: "rgba(180, 195, 210, 1)",
+            borderWidth: 1
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            stacked: true,
+            beginAtZero: true,
+            ticks: { stepSize: 1 }
+          },
+          y: {
+            stacked: true,
+            ticks: { stepSize: 1 }
+          }
+        }
+      }
+    });
+
   });
 
-  const collapseOperationsEl = document.getElementById("collapseOperations");
-  const operationsButton = document.querySelector(
-    '[data-bs-target="#collapseOperations"]',
-  );
-  collapseOperationsEl.addEventListener("shown.bs.collapse", () => {
-    operationsButton.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+  const departmentPieData = <%- JSON.stringify(pieChart) %>;
 
-  const dataBarCtx = document.getElementById("dataChart").getContext("2d");
-  new Chart(dataBarCtx, {
-    type: "bar",
-    data: {
-      datasets: [
-        {
-          data: [12, 19, 8, 13],
-        },
-      ],
-      labels: ["Alice", "Bob", "Charlie", "David"],
-    },
-  });
+  Object.entries(departmentPieData).forEach(([department, rows]) => {
+    const canvas = document.getElementById(`${department}PieChart`);
+    if (!canvas) return;
 
-  const marketingBarCtx = document
-    .getElementById("marketingChart")
-    .getContext("2d");
-  new Chart(marketingBarCtx, {
-    type: "bar",
-    data: {
-      datasets: [
-        {
-          data: [10, 15, 5, 20],
-        },
-      ],
-      labels: ["Dirk", "Eve", "Frank", "Grace"],
-    },
-  });
+    const row = rows[0];
 
-  const OperationsBarCtx = document
-    .getElementById("operationsChart")
-    .getContext("2d");
-  new Chart(OperationsBarCtx, {
-    type: "bar",
-    data: {
-      datasets: [
-        {
-          data: [5, 25, 10, 15],
-        },
-      ],
-      labels: ["Kevin", "Laura", "Mallory", "Nina"],
-    },
+    const labels = ["Completed", "Stuck", "Remaining"];
+    const completed = row.completed_tasks || 0;
+    const stuck = row.stuck_tasks || 0;
+    const remaining = (row.total_tasks || 0) - completed - stuck;
+
+    const data = [completed, stuck, remaining];
+    console.log(`Department: ${department}, Data:`, data);
+
+    const colors = ['#28a745', '#dc3545', '#ffc107'];
+
+    new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, 
+        plugins: {
+          tooltip: { enabled: true },
+          legend: { position: 'bottom' }
+        }
+      }
+    });
   });
 </script>
 <%- include("../views/partials/footer.ejs") %>

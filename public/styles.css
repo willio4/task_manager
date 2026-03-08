@@ -15,6 +15,34 @@ body {
     display: none;
 }
 
+/* Non-active pills (default color) */
+.pill {
+  color: black !important;       /* text black */
+  border-radius: 50rem;
+  background-color: transparent; /* keeps it neutral */
+}
+
+/* Active pill */
+.pill.active {
+  background-color: gold !important; /* only active is gold */
+  color: black !important;
+}
+
+.pill:hover {
+  background-color: #e6c200 !important;
+  color: black !important;
+}
+
+.btn-primary, button {
+  background-color: #FFD700;
+  border-color: #FFD700;
+  border-radius: 5px;
+}
+
+.btn-primary:hover {
+    background-color: #FFC300;
+    border-color: #FFC300;
+}
 .health-chart {
     min-height: 20rem;
 }

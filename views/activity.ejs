@@ -18,17 +18,31 @@
                       <th scope="col">Status</th>
                       <th scope="col">Due Date</th>
                       <th scope="col">Priority</th>
+                      <th scope="col">Updated At</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <% orgTasks.forEach(task => { const date = task.due_date.toDateString().slice(4,15)%>
+                    <% orgTasks.forEach(task => { 
+                         const dueDate = task.due_date.toDateString().slice(4,15);
+                         const updatedAt = task.updated_at 
+                           ? new Date(task.updated_at).toLocaleString('en-US', {
+                               month: 'short',
+                               day: 'numeric',
+                               year: 'numeric',
+                               hour: '2-digit',
+                               minute: '2-digit',
+                               hour12: true
+                             }) 
+                           : '-';
+                    %>
                       <tr>
                         <td><%= task.created_by %></td>
                         <td><%= task.created_for %></td>
                         <td><%= task.title %></td>
                         <td><%= task.status %></td>
-                        <td><%= date %></td>
+                        <td><%= dueDate %></td>
                         <td><%= task.priority %></td>
+                        <td><%= updatedAt %></td>
                       </tr>
                     <% }) %>
                   </tbody>

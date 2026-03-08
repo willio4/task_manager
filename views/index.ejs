@@ -67,7 +67,7 @@
           <div class="card-body">
             <ul class="card-text">
               <% if(userTasks.length > 0) { userTasks.forEach(task => { %>
-                <li><%=task.first_name%> - "<%= task.title %>"</li>
+                <li><%=task.first_name%> - "<%= task.title %> <% if(task.status === "Completed") { %>" (Completed) <% } else { %> Due: <%= task.due_date.toDateString().slice(4,10) %> <% } %> </li>
               <% }) } else { %>
                 <p class="text-center text-muted m-0">No assigned tasks</p>
               <% } %>
@@ -80,8 +80,8 @@
           <div class="card-header">Help a Teammate:</div>
           <div class="card-body">
             <ul class="card-text">
-              <% if(stuckTasks.length > 0) { stuckTasks.forEach(task => { %> 
-                <li><%= task.first_name %> - "<%= task.title %>" </li>
+              <% if(stuckTasks.length > 0) { stuckTasks.forEach(task => {  %> 
+                <li><%= task.first_name %> - "<%= task.title %>" Due: <%= task.due_date.toDateString().slice(4,10) %> (<%= task.priority %>) </li>
               <% }) } else { %>
                 <p class="text-center text-muted m-0">No Stuck tasks</p>
               <% } %>

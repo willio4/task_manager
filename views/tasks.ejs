@@ -5,34 +5,34 @@
       <div class="col">
         <div class="card">
           <div class="card-header">
-            <h1 class="text-center">Tasks</h1>
-            <ul class="nav nav-pills card-header-pills my-1" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active mx-3"
-                  data-bs-toggle="pill"
-                  data-bs-target="#inbound"
-                  type="button"
-                  role="tab"
-                >
-                  Inbound
-                </button>
-              </li>
-              <% if(currentProfile.role !== "Associate") { %>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  data-bs-toggle="pill"
-                  data-bs-target="#outbound"
-                  type="button"
-                  role="tab"
-                >
-                  Outbound
-                </button>
-              </li>
-              <% } %>
-            </ul>
-          </div>
+  <h1 class="text-center">Tasks</h1>
+  <ul class="nav nav-pills card-header-pills my-1" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link pill active mx-3"
+        data-bs-toggle="pill"
+        data-bs-target="#inbound"
+        type="button"
+        role="tab"
+      >
+        Inbound
+      </button>
+    </li>
+    <% if(currentProfile.role !== "Associate") { %>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link pill mx-3"
+        data-bs-toggle="pill"
+        data-bs-target="#outbound"
+        type="button"
+        role="tab"
+      >
+        Outbound
+      </button>
+    </li>
+    <% } %>
+  </ul>
+</div>
 
           <div class="card-body">
             <div class="tab-content">
@@ -42,30 +42,39 @@
                 id="inbound"
                 role="tabpanel"
               >
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Done?</th>
-                      <th scope="col">Assigner</th>
-                      <th scope="col">Task</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Due Date</th>
-                      <th scope="col">Priority</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% tasksReceived.forEach(task => { const date = task.due_date.toDateString().slice(4,15)%>
+                <form action="/update-tasks" method="POST" id="updateForm">
+                  <table class="table">
+                    <thead>
                       <tr>
-                        <th scope="row"><input type="checkbox" <%= task.status === "complete" ? "checked" : "" %>></th>
-                        <td><%= task.first_name %></td>
-                        <td><%= task.title %></td>
-                        <td><%= task.status %></td>
-                        <td><%= date %></td>
-                        <td><%= task.priority %></td>
+                        <th scope="col">Done?</th>
+                        <th scope="col">Assigner</th>
+                        <th scope="col">Task</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Priority</th>
                       </tr>
-                    <% }) %>
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      <% tasksReceived.forEach(task => { 
+                           const date = task.due_date.toDateString().slice(4,15); 
+                           if(task.status === "Completed") return; %>
+                        <tr>
+                          <th scope="row">
+                            <input type="checkbox" name="taskIds[]" value="<%= task.id %>">
+                          </th>
+                          <td><%= task.first_name %></td>
+                          <td><%= task.title %></th>
+                          <td><%= task.status %></td>
+                          <td><%= date %></td>
+                          <td><%= task.priority %></td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                  <div class="d-flex flex-row justify-content-end mt-3">
+                    <button type="submit" class="btn btn-secondary disabled" id="updateBtn">Update Status</button>
+                  </div>
+                </form>
               </div>
               
               <!-- Outbound Tab -->
@@ -95,7 +104,7 @@
                         <td><%= task.first_name %></td>
                         <td><%= task.title %></td>
                         <td><%= task.status %></td>
-                        <td><%=date%></td>
+                        <td><%= date %></td>
                         <td><%= task.priority %></td>
                       </tr>
                     <% }) %>
@@ -127,7 +136,7 @@
         <form action="/create-task" method="POST">
           <div class="my-2">
             <label for="assignee" class="form-label">Assign To: </label>
-            <select class="form-select" id="assignee" name="assignee"aria-label="Default select example">
+            <select class="form-select" id="assignee" name="assignee" aria-label="Default select example">
               <option selected>Select Employee</option>
               <% employees.forEach(employee => { %>
                 <option value="<%= employee.user_id %>"><%= employee.first_name %> <%= employee.last_name %></option>
@@ -150,7 +159,7 @@
               placeholder="Task Description"
               autocapitalize="sentences"></textarea>
             <label for="priority" class="form-label mt-3">Priority:</label>
-            <select class="form-select" name="priority"aria-label="Default select example">
+            <select class="form-select" name="priority" aria-label="Default select example">
               <option selected>Select Priority</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -177,4 +186,26 @@
     </div>
   </div>
 </div>
+
+<!-- Script to enable/disable Update Status button -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const updateBtn = document.getElementById('updateBtn');
+    const checkboxes = document.querySelectorAll('#inbound tbody input[type="checkbox"]');
+
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        if (anyChecked) {
+          updateBtn.classList.remove('disabled', 'btn-secondary');
+          updateBtn.classList.add('btn-primary');
+        } else {
+          updateBtn.classList.add('disabled', 'btn-secondary');
+          updateBtn.classList.remove('btn-primary');
+        }
+      });
+    });
+  });
+</script>
+
 <%- include("../views/partials/footer.ejs") %>

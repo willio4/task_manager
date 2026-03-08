@@ -4,45 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Task Manager</title>
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
+
   <body>
-    <nav id="top-nav" class="d-flex flex-row">
-      <div class="container py-1 flex-grow-1">
-        <h1><a href="/" class="text-white text-decoration-none">Task Manager</a></h1>
+    <!-- TOP NAV -->
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">Task Manager</a>
+
+        <div class="d-flex align-items-center gap-3">
+          <% if(typeof currentProfile !== "undefined" && currentProfile) { %>
+            <a href="/profile" class="text-white text-decoration-none">
+              Welcome, <%= currentProfile.first_name %>
+            </a>
+            <a href="/logout" class="btn btn-outline-light btn-sm">
+              Logout
+            </a>
+          <% } else { %>
+            <a href="/login" class="btn btn-outline-light btn-sm">
+              Login
+            </a>
+            <a href="/signup" class="btn btn-light btn-sm">
+              Sign Up
+            </a>
+          <% } %>
+        </div>
       </div>
-      <% if(currentProfile) { %>
-        <a href="/profile" id="profile-link" class="align-self-center header-link">Welcome, <%= currentProfile.first_name %></a>
-        <a href="/logout" class="align-self-center">
-          <button class="btn text-white creds">Logout</button>
-        </a>
-      <% } else { %>
-        <a href="/login" class="align-self-center">
-          <button class="btn text-white creds">Login</button>
-        </a>
-        <a href="/signup" class="align-self-center">
-          <button class="btn text-white creds">Sign Up</button>
-        </a>
-      <% } %> 
     </nav>
 
-    <nav id="bottom-nav">
-      <div class="container text-center">
-        <div class="d-flex flex-row justify-content-start gap-3">
-          <button class="btn text-white fw-semibold"><a href="/" class="header-link">Dashboard</a></button>
-          <button class="btn text-white fw-semibold"><a href="/tasks" class="header-link">Tasks</a></button>
-          <button class="btn text-white fw-semibold"><a href="/my-work" class="header-link">My Work</a></button>
-          <button class="btn text-white fw-semibold"><a href="/activity" class="header-link">Activity</a></button>
-          <button class="btn text-white fw-semibold"><a href="/health" class="header-link">Health</a></button>
-          <% if(currentProfile && (currentProfile.role === "Admin" || currentProfile.role === "Manager")) { %>
-             <button class="btn text-white fw-semibold"><a href="/admin" class="header-link">Admin</a></button>
-          <% } %>
+    <!-- MAIN NAV -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <div class="container">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/tasks">Tasks</a></li>
+            <li class="nav-item"><a class="nav-link" href="/my-work">My Work</a></li>
+            <li class="nav-item"><a class="nav-link" href="/activity">Activity</a></li>
+            <li class="nav-item"><a class="nav-link" href="/health">Health</a></li>
+
+            <% if(typeof currentProfile !== "undefined" && currentProfile && 
+                  (currentProfile.role === "Admin" || currentProfile.role === "Manager")) { %>
+              <li class="nav-item">
+                <a class="nav-link fw-semibold text-danger" href="/admin">Admin</a>
+              </li>
+            <% } %>
+          </ul>
         </div>
       </div>
     </nav>
