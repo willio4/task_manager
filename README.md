@@ -10,31 +10,7 @@ A full-stack web application for managing organizational tasks with **role-based
 - **Task Management**: Create, assign, update, and track tasks  
 - **Interactive Dashboards**: Visualize departmental and organizational metrics  
 - **Data Analytics**: Track task completion, stuck tasks, and overall progress  
-- **Responsive Design**: Desktop and mobile-friendly interface  
-
----
-
-## Demo Sign-In Credentials
-
-Use the following accounts to explore different roles:
-
-**Admin**  
-- Email: `admin@ex.com`  
-- Password: `admin1`  
-
-**Manager**  
-- Email: `manager@ex.com`  
-- Password: `password1`  
-
-**Supervisor**  
-- Email: `marketing-supervisor@ex.com`  
-- Password: `password1`  
-
-**Associate**  
-- Email: `operations-associate3@ex.com`  
-- Password: `password1`  
-
-> ⚠️ Note: These accounts are for demonstration purposes only.
+- **Responsive Design**: Works on desktop and mobile devices  
 
 ---
 
@@ -46,14 +22,19 @@ git clone https://github.com/willio4/task-management-app.git
 2. **Install dependencies**  
 npm install
 
-3. **Configure your PostgreSQL database**  
-Update `config/db.js` with your database credentials.
+3. **Set up your PostgreSQL database**  
+- Install PostgreSQL locally if you don’t already have it.  
+- Create a new database (e.g., `task_management`).  
+- Use the provided database schema or SQL seed file (if included) to create tables and insert sample data.
 
-4. **Start the application**  
-npm start
+4. **Configure the app to connect to your database**  
+- Open `config/db.js` and update the `user`, `password`, `database`, and `host` fields with your PostgreSQL credentials.
 
-5. **Access the app**  
-Open your browser at http://localhost:3000 and log in using the demo credentials above.
+5. **Start the application**  
+nodemon
+
+6. **Access the app**  
+Open your browser at http://localhost:3000. Once your database is set up and seeded, you can create accounts and explore the app.
 
 ---
 
@@ -64,4 +45,6 @@ Open your browser at http://localhost:3000 and log in using the demo credentials
 - **Database:** PostgreSQL  
 - **Data Visualization:** Chart.js  
 - **Other:** Role-based authentication, session management  
+
+---
 
