@@ -173,7 +173,6 @@ app.get("/", ensureLoggedIn, async (req, res) => {
 
 app.get("/tasks", ensureLoggedIn, async (req, res) => {
   try {
-    // Employees for the dropdown (exclude current user)
     const employeesRes = await db.query(
       `SELECT user_id, first_name, last_name
        FROM profiles
@@ -417,7 +416,6 @@ app.post("/update-tasks", ensureLoggedIn, async (req, res) => {
       WHERE id = ANY($1::int[])`,
       [taskIds],
     );
-    console.log(result.rowCount, "tasks updated");
   } catch (err) {
     console.error(err);
   }

@@ -15,16 +15,14 @@ body {
     display: none;
 }
 
-/* Non-active pills (default color) */
 .pill {
-  color: black !important;       /* text black */
+  color: black !important;
   border-radius: 50rem;
-  background-color: transparent; /* keeps it neutral */
+  background-color: transparent; 
 }
 
-/* Active pill */
 .pill.active {
-  background-color: gold !important; /* only active is gold */
+  background-color: gold !important;
   color: black !important;
 }
 
