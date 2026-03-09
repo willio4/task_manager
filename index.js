@@ -195,7 +195,7 @@ app.get("/tasks", ensureLoggedIn, async (req, res) => {
          tasks.due_date,
          profiles.first_name
        FROM tasks
-       JOIN profiles ON profiles.user_id = tasks.created_for
+       JOIN profiles ON profiles.user_id = tasks.created_by
        WHERE tasks.created_for = $1
        ORDER BY tasks.due_date ASC`,
       [req.user.id],
@@ -219,7 +219,7 @@ app.get("/tasks", ensureLoggedIn, async (req, res) => {
          tasks.due_date,
          profiles.first_name
        FROM tasks
-       JOIN profiles ON profiles.user_id = tasks.created_by
+       JOIN profiles ON profiles.user_id = tasks.created_for
        WHERE tasks.created_by = $1
        ORDER BY tasks.due_date ASC`,
       [req.user.id],
