@@ -14,10 +14,18 @@ A full-stack web application for managing organizational tasks with **role-based
 
 ---
 
-## Getting Started
+### Getting Started
+
+You can explore the application in two ways:
+
+**1. Watch the live demo**  
+No setup required — see the app in action here: [Task Manager Demo Video](https://youtu.be/P2THTEeFyPE)  
+
+**2. Run locally (optional)**  
+If you want to run the app on your machine:  
 
 1. **Clone the repository**  
-git clone https://github.com/willio4/task-management-app.git
+git clone https://github.com/willio4/task_manager
 
 2. **Install dependencies**  
 npm install
